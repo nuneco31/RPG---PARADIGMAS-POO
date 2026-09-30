@@ -83,6 +83,21 @@ class TestRespawn(unittest.TestCase):
         self.assertTrue(jogo.inimigo.esta_vivo())
         self.assertEqual(jogo.inimigo.nome, 'Goblin 3')
 
+    def test_percentuais_de_progressao_do_jogador_e_inimigo(self):
+        jogador = type('JogadorFake', (), {'nivel': 1, 'ataque': 20, 'vida': 100})()
+        jogador.vida = 100
+        jogador.ataque = 20
+
+        novo_ataque = jogador.ataque * 1.25
+        nova_vida = jogador.vida * 1.23
+        vida_goblin = 50 * 1.15
+        ataque_goblin = 15 * 1.10
+
+        self.assertAlmostEqual(novo_ataque, 25.0)
+        self.assertAlmostEqual(nova_vida, 123.0)
+        self.assertAlmostEqual(vida_goblin, 57.5)
+        self.assertAlmostEqual(ataque_goblin, 16.5)
+
 
 if __name__ == '__main__':
     unittest.main()

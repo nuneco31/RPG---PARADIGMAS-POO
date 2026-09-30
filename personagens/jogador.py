@@ -31,10 +31,14 @@ class Jogador(Personagem):
         print(f"XP: {self.xp}/{self.xp_necessaria}")
 
     def ganhar_xp(self, quantidade):
-        """Acrescenta experiência e verifica se o jogador evoluiu de nível."""
+        """Acrescenta experiência e aumenta os atributos conforme as regras do jogo."""
         self.xp += quantidade
 
+        # A cada XP ganho, o ataque do jogador aumenta em 25% do valor atual.
+        self.ataque = int(self.ataque * 1.25)
+
         print(f"\n{self.nome} ganhou {quantidade} XP!")
+        print(f"Ataque aumentado para {self.ataque}.")
 
         self.verificar_level_up()
 
@@ -44,17 +48,18 @@ class Jogador(Personagem):
             xp_usada = self.xp_necessaria
             self.xp -= xp_usada
             self.nivel += 1
-            self.vida += 20
-            self.ataque += 5
+
+            # Quando sobe de nível, a vida aumenta 23% do valor atual.
+            self.vida = int(self.vida * 1.23)
+
+            # O próximo goblin também sobe em vida de acordo com a progressão.
             self.xp_necessaria = int(self.xp_necessaria * 1.25)
 
             print("\n==============================")
             print("          LEVEL UP!")
             print("==============================")
             print(f"{self.nome} chegou ao nível {self.nivel}!")
-            print("\nNovos atributos:")
-            print("+20 Vida")
-            print("+5 Ataque")
+            print(f"Vida aumentada para {self.vida}.")
             print(f"\nPróximo nível: {self.xp_necessaria} XP")
 
     def usar_habilidade(self, alvo):

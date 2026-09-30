@@ -125,13 +125,17 @@ class Jogo:
             else:
                 return
 
-        nivel_atual = max(1, self.jogador.nivel)
+        # As estatísticas do novo goblin são escaladas de acordo com as regras
+        # pedidas: vida +15% e ataque +10% em relação ao goblin anterior.
+        base_vida = getattr(inimigo_derrotado, "vida", 50)
+        base_ataque = getattr(inimigo_derrotado, "ataque", 15)
+
         novo_goblin = Inimigo(
             nome=f"Goblin {self.proximo_numero_goblin}",
-            vida=50 + (nivel_atual - 1) * 10,
-            ataque=15 + (nivel_atual - 1) * 3,
-            defesa=3 + (nivel_atual - 1),
-            xp_recompensa=25 + (nivel_atual - 1) * 10,
+            vida=int(base_vida * 1.15) if base_vida > 0 else 50,
+            ataque=int(base_ataque * 1.10) if base_ataque > 0 else 15,
+            defesa=max(3, int(getattr(inimigo_derrotado, "defesa", 3) * 1.10)),
+            xp_recompensa=25 + (self.jogador.nivel - 1) * 10,
         )
 
         if inimigo_derrotado is self.inimigo:
