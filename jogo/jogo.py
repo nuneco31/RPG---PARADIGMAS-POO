@@ -66,6 +66,9 @@ class Jogo:
         # Mensagem que orienta o jogador no início da partida.
         self.mensagem = "1 = Goblin 1 | 2 = Goblin 2 | ESPACO = atacar"
 
+        # Controla o número do próximo goblin que aparecerá após uma derrota.
+        self.proximo_numero_goblin = 3
+
         # Instancia os módulos responsáveis por combate, eventos e renderização.
         self.combate = Combate(self)
         self.eventos = Eventos(self)
@@ -112,9 +115,46 @@ class Jogo:
         self.alvo_atual = alvo
         self.mensagem = f"Alvo selecionado: {alvo.nome}"
 
+    def gerar_novo_goblin(self, inimigo_derrotado=None):
+        """Cria um novo goblin em lugar do inimigo derrotado para continuar a escalada."""
+        if inimigo_derrotado is None:
+            if self.inimigo is None or not self.inimigo.esta_vivo():
+                inimigo_derrotado = self.inimigo
+            elif self.inimigo2 is None or not self.inimigo2.esta_vivo():
+                inimigo_derrotado = self.inimigo2
+            else:
+                return
+
+        nivel_atual = max(1, self.jogador.nivel)
+        novo_goblin = Inimigo(
+            nome=f"Goblin {self.proximo_numero_goblin}",
+            vida=50 + (nivel_atual - 1) * 10,
+            ataque=15 + (nivel_atual - 1) * 3,
+            defesa=3 + (nivel_atual - 1),
+            xp_recompensa=25 + (nivel_atual - 1) * 10,
+        )
+
+        if inimigo_derrotado is self.inimigo:
+            self.inimigo = novo_goblin
+            self.alvo_atual = self.inimigo
+            self.mensagem = f"Novo inimigo apareceu: {self.inimigo.nome}"
+        elif inimigo_derrotado is self.inimigo2:
+            self.inimigo2 = novo_goblin
+            self.alvo_atual = self.inimigo2
+            self.mensagem = f"Novo inimigo apareceu: {self.inimigo2.nome}"
+        else:
+            self.alvo_atual = novo_goblin
+            self.mensagem = f"Novo inimigo apareceu: {novo_goblin.nome}"
+
+        self.proximo_numero_goblin += 1
+
     def atacar_inimigo_selecionado(self):
         """Executa o combate contra o alvo atual."""
         self.combate.atacar_inimigo_selecionado()
+
+        # Se o alvo atual morreu, cria um novo goblin para continuar o desafio.
+        if self.alvo_atual is not None and not self.alvo_atual.esta_vivo():
+            self.gerar_novo_goblin(self.alvo_atual)
 
     def atacar_goblin1(self):
         """Compatibilidade com chamadas antigas do código."""

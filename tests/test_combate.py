@@ -1,6 +1,7 @@
 import unittest
 
 from jogo.combate import Combate
+from jogo.jogo import Jogo
 
 
 class JogadorFake:
@@ -66,6 +67,21 @@ class TestCombate(unittest.TestCase):
 
         self.assertLess(self.jogo.inimigo.vida, 50)
         self.assertLess(self.jogo.jogador.vida, vida_inicial)
+
+
+class TestRespawn(unittest.TestCase):
+    def test_gerar_novo_goblin_substitui_o_derrotado(self):
+        jogo = object.__new__(Jogo)
+        jogo.jogador = type('JogadorFake', (), {'nivel': 1})()
+        jogo.inimigo = InimigoFake('Goblin 1', vida=0)
+        jogo.inimigo2 = InimigoFake('Goblin 2', vida=50)
+        jogo.alvo_atual = jogo.inimigo
+        jogo.proximo_numero_goblin = 3
+
+        jogo.gerar_novo_goblin(jogo.inimigo)
+
+        self.assertTrue(jogo.inimigo.esta_vivo())
+        self.assertEqual(jogo.inimigo.nome, 'Goblin 3')
 
 
 if __name__ == '__main__':

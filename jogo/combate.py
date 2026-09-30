@@ -23,13 +23,14 @@ class Combate:
         vida_antes = alvo.vida
         self.jogo.jogador.atacar(alvo)
 
-        # Se o inimigo morrer, o jogador ganha XP e o combate termina para ele.
+        # Se o inimigo morrer, o jogador ganha XP e um novo goblin aparece.
         if not alvo.esta_vivo():
             self.jogo.jogador.ganhar_xp(alvo.xp_recompensa)
             self.jogo.mensagem = (
                 f"{alvo.nome.upper()} DERROTADO! "
                 f"+{alvo.xp_recompensa} XP"
             )
+            self.jogo.gerar_novo_goblin(alvo)
             return True
 
         # Após o ataque do jogador, o alvo selecionado contra-ataca.
