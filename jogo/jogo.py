@@ -125,8 +125,11 @@ class Jogo:
             else:
                 return
 
-        # As estatísticas do novo goblin são escaladas de acordo com as regras
-        # pedidas: vida +15% e ataque +10% em relação ao goblin anterior.
+        alvo_anterior = self.alvo_atual
+
+        # Ajusta as estatísticas do novo goblin usando a escala progressiva
+        # pedida pelo jogador: vida +15% e ataque +10% em relação ao goblin
+        # que foi derrotado.
         base_vida = getattr(inimigo_derrotado, "vida", 50)
         base_ataque = getattr(inimigo_derrotado, "ataque", 15)
 
@@ -140,15 +143,26 @@ class Jogo:
 
         if inimigo_derrotado is self.inimigo:
             self.inimigo = novo_goblin
-            self.alvo_atual = self.inimigo
             self.mensagem = f"Novo inimigo apareceu: {self.inimigo.nome}"
         elif inimigo_derrotado is self.inimigo2:
             self.inimigo2 = novo_goblin
-            self.alvo_atual = self.inimigo2
             self.mensagem = f"Novo inimigo apareceu: {self.inimigo2.nome}"
         else:
-            self.alvo_atual = novo_goblin
             self.mensagem = f"Novo inimigo apareceu: {novo_goblin.nome}"
+
+        # Importante: o alvo selecionado não deve ser sobrescrito só porque um
+        # goblin diferente foi substituído. Mantemos a seleção atual enquanto ela
+        # estiver viva; somente quando o alvo derrotado era o selecionado o novo
+        # goblin assume esse papel.
+        if alvo_anterior is inimigo_derrotado:
+            self.alvo_atual = novo_goblin
+        elif self.alvo_atual is None or not self.alvo_atual.esta_vivo():
+            if self.inimigo is not None and self.inimigo.esta_vivo():
+                self.alvo_atual = self.inimigo
+            elif self.inimigo2 is not None and self.inimigo2.esta_vivo():
+                self.alvo_atual = self.inimigo2
+            else:
+                self.alvo_atual = None
 
         self.proximo_numero_goblin += 1
 

@@ -83,6 +83,18 @@ class TestRespawn(unittest.TestCase):
         self.assertTrue(jogo.inimigo.esta_vivo())
         self.assertEqual(jogo.inimigo.nome, 'Goblin 3')
 
+    def test_respawn_nao_sobrescreve_o_alvo_selecionado(self):
+        jogo = object.__new__(Jogo)
+        jogo.jogador = type('JogadorFake', (), {'nivel': 1})()
+        jogo.inimigo = InimigoFake('Goblin 1', vida=50)
+        jogo.inimigo2 = InimigoFake('Goblin 2', vida=50)
+        jogo.alvo_atual = jogo.inimigo2
+        jogo.proximo_numero_goblin = 3
+
+        jogo.gerar_novo_goblin(jogo.inimigo)
+
+        self.assertIs(jogo.alvo_atual, jogo.inimigo2)
+
     def test_percentuais_de_progressao_do_jogador_e_inimigo(self):
         jogador = type('JogadorFake', (), {'nivel': 1, 'ataque': 20, 'vida': 100})()
         jogador.vida = 100
