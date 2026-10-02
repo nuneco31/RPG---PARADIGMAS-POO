@@ -19,53 +19,33 @@ Na pasta do projeto:
 python main.py
 ```
 
-Isso abre o jogo em Pygame. Para iniciar a campanha de terminal, sem dependências externas:
+Isso abre a campanha completa em uma janela Pygame. Para iniciar a versão alternativa de terminal:
 
 ```powershell
 python main.py --terminal
 ```
 
-No Pygame, use `W`, `A`, `S`, `D` para mover, `1` ou `2` para selecionar um Goblin e `Espaço` para atacar.
+No Pygame, jogue clicando nos botões de explorar, inventário, status, habilidades e salvar. Durante a batalha, clique em ataque, habilidade, poção, defender ou fugir. O modo gráfico agora apresenta a campanha, os eventos e o chefe; a alternativa de terminal segue disponível pelo comando acima.
 
 ## Como jogar
 
-No menu principal:
+No menu principal, clique em **Explorar**, **Inventário**, **Status**, **Habilidades**, **Salvar jogo** ou **Carregar jogo**. Na exploração, escolha a estrada, entre na floresta ou procure itens. Eventos incluem combates, tesouros, NPCs, armadilhas e achados raros. Vença três encontros para chegar ao Rei Goblin, chefe com 250 HP e um golpe especial periódico.
 
-```text
-1 - Explorar
-2 - Inventário
-3 - Status
-4 - Habilidades
-5 - Salvar jogo
-6 - Carregar jogo
-7 - Sair
-```
-
-Na Floresta Sombria, escolha a estrada, entre na floresta ou procure itens. Eventos incluem combates, tesouros, NPCs, armadilhas e achados raros. Vença três encontros para chegar ao Rei Goblin, chefe com 250 HP e um golpe especial periódico.
-
-Durante o combate:
-
-```text
-1 - Ataque
-2 - Habilidade
-3 - Usar poção
-4 - Defender
-5 - Fugir
-```
-
-Entradas inválidas não consomem o turno. Habilidades usam mana; defesa reduz o próximo dano e poções são consumidas do inventário. O progresso pode ser salvo em `save.json` na pasta atual.
+Durante o combate, clique em **Atacar**, **Habilidade**, **Usar poção**, **Defender** ou **Fugir**. Habilidades usam mana; defesa reduz o próximo dano e poções são consumidas do inventário. O progresso pode ser salvo em `save.json` na pasta atual. Pressione `Esc` para voltar de uma tela ou fechar o jogo no menu principal.
 
 ## Estrutura e classes principais
 
 ```text
-main.py                    Entrada; modo terminal ou Pygame
+main.py                    Entrada; inicia a campanha Pygame ou modo terminal
+jogo/interface.py          Fluxo da campanha gráfica
+jogo/interface_eventos.py  Cliques e teclas da interface
+jogo/interface_renderizador.py Desenho das telas e botões
 jogo/terminal.py           Menus, exploração e eventos
 jogo/batalha_terminal.py   Turnos e regras da batalha terminal
 jogo/salvamento.py         Persistência JSON
-jogo/jogo.py               Interface Pygame original
-jogo/combate.py            Combate da interface Pygame
-jogo/eventos.py            Teclado da interface Pygame
-graficos/renderizador.py   Desenho da interface Pygame
+jogo/jogo.py               Protótipo gráfico anterior preservado
+jogo/combate.py            Combate do protótipo gráfico anterior
+graficos/renderizador.py   Renderização do protótipo gráfico anterior
 personagens/personagem.py  Classe base abstrata e regras comuns
 personagens/jogador.py     Jogador, habilidades e progressão
 personagens/inimigo.py     Inimigo, Goblin, Orc, Mago e Chefe
@@ -80,7 +60,7 @@ tests/                     Testes automatizados
 - **Herança:** `Jogador` e `Inimigo` especializam `Personagem`; Goblin, Orc, Mago e Chefe especializam `Inimigo`.
 - **Polimorfismo:** a batalha chama `acao_turno` sem precisar conhecer o tipo concreto. O Mago atravessa parte da defesa e o Chefe usa um golpe especial a cada três turnos.
 - **Encapsulamento:** vida, ataque e defesa são armazenados em atributos protegidos; propriedades mantêm vida dentro de `0..vida_maxima` e atributos não negativos.
-- **Composição:** `Jogador` possui um `Inventario` e um conjunto de `Habilidade`; `JogoTerminal` coordena jogador, exploração, batalha e salvamento.
+- **Composição:** `Jogador` possui um `Inventario` e um conjunto de `Habilidade`; `JogoInterface` coordena jogador, telas, exploração, batalha e salvamento.
 - **Separação de responsabilidades:** regras de personagens, batalha, interface, exploração e JSON ficam em módulos distintos.
 
 ## Testes

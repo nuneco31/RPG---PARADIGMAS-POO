@@ -95,9 +95,12 @@ class JogoTerminal:
                 self.progresso["chefe_derrotado"] = True
                 self.output("A floresta está livre. Você concluiu esta aventura!")
             return
-        evento = "tesouro" if escolha == "3" else self.rng.choice(
-            ["inimigo"] * 5 + ["tesouro"] * 3 + ["npc"] * 2 + ["armadilha", "raro"]
-        )
+        if escolha == "3":
+            evento = "tesouro"
+        elif escolha == "1":
+            evento = self.rng.choice(["inimigo"] * 3 + ["tesouro"] * 3 + ["npc"] * 4 + ["armadilha", "raro"])
+        else:
+            evento = self.rng.choice(["inimigo"] * 6 + ["tesouro"] * 2 + ["npc", "armadilha"] * 2 + ["raro"])
         self._resolver_evento(evento)
 
     def _resolver_evento(self, evento):

@@ -13,6 +13,6 @@ if __name__ == "__main__":
 
         JogoTerminal().executar()
     else:
-        from jogo.jogo import Jogo
+        from jogo.interface import JogoInterface
 
-        Jogo().executar()
+        JogoInterface().executar()
