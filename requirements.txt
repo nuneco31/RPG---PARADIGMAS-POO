@@ -1,0 +1,2 @@
+# Necessário somente para o modo gráfico opcional (--pygame).
+pygame-ce>=2.5,<3

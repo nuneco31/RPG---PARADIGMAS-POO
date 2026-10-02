@@ -1,98 +1,91 @@
-# RPG em Python - Paradigmas da Programação / POO
+# RPG Aventura — Paradigmas da Programação / POO
 
-## Visão geral
+RPG didático em Python com uma campanha curta por terminal. O projeto demonstra POO por meio de personagens, inimigos com comportamentos próprios, combate em turnos, inventário composto e progressão. A interface Pygame original continua disponível como modo gráfico opcional.
 
-Este projeto foi desenvolvido como uma aplicação didática de Programação Orientada a Objetos (POO), utilizando Python e a biblioteca Pygame para representar um pequeno jogo de RPG em 2D. A proposta principal é demonstrar os princípios de encapsulamento, herança, abstração e organização por responsabilidades em um sistema simples e funcional.
+## Requisitos e instalação
 
-O jogo simula uma batalha entre o jogador e inimigos, com movimentação, seleção de alvo, combate, sistema de XP e evolução de nível. A estrutura foi organizada em módulos para facilitar a compreensão e a apresentação do projeto em uma disciplina acadêmica.
+- Python 3.10 ou superior.
+- O modo terminal não precisa de bibliotecas externas.
+- Para abrir a interface gráfica opcional, instale Pygame Community Edition:
 
-## Objetivos do projeto
-
-- aplicar conceitos de POO em um cenário prático
-- demonstrar a separação de responsabilidades em classes e pacotes
-- implementar um sistema de combate simples e interativo
-- desenvolver uma arquitetura organizada para facilitar manutenção e leitura
-
-## Conceitos de POO aplicados
-
-- Herança: a classe `Jogador` e a classe `Inimigo` herdam de `Personagem`
-- Encapsulamento: atributos como vida, ataque e defesa ficam dentro das classes
-- Abstração: o código usa classes e métodos com funções bem definidas
-- Modularização: o projeto foi dividido em diretórios conforme a responsabilidade de cada parte
-
-## Estrutura do projeto
-
-```text
-rpg-c/
-├── main.py
-├── README.md
-├── .gitignore
-├── .venv/
-├── jogo/
-│   ├── __init__.py
-│   ├── jogo.py
-│   ├── eventos.py
-│   └── combate.py
-├── personagens/
-│   ├── __init__.py
-│   ├── personagem.py
-│   ├── jogador.py
-│   └── inimigo.py
-├── graficos/
-│   ├── __init__.py
-│   └── renderizador.py
-└── tests/
-    └── test_combate.py
+```powershell
+python -m pip install -r requirements.txt
 ```
-
-## Responsabilidade de cada pasta
-
-- `main.py`: ponto de entrada do programa
-- `jogo/`: lógica principal do jogo, processamento de ações e regras de combate
-- `personagens/`: classes do jogador, inimigos e personagem base
-- `graficos/`: renderização da interface visual em tela
-- `tests/`: testes automatizados para validar o comportamento do combate
-
-## Requisitos
-
-- Python 3.10 ou superior
-- Biblioteca Pygame
-- Ambiente virtual recomendado
 
 ## Como executar
 
-1. Acesse a pasta do projeto.
-2. Ative o ambiente virtual:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-3. Execute o jogo:
+Na pasta do projeto:
 
 ```powershell
 python main.py
 ```
 
-## Controles
+Isso inicia a aventura de terminal. Para executar a interface gráfica preservada:
 
-- `W`, `A`, `S`, `D`: movimentação do personagem
-- `1`: selecionar o Goblin 1
-- `2`: selecionar o Goblin 2
-- `Espaço`: atacar o goblin selecionado
+```powershell
+python main.py --pygame
+```
 
-## Sistema de combate
+## Como jogar
 
-O sistema de combate funciona da seguinte forma:
+No menu principal:
 
-1. o jogador seleciona um inimigo usando as teclas `1` ou `2`
-2. o personagem ataca com `Espaço`
-3. o goblin selecionado reage atacando o jogador na sequência
-4. se o inimigo for derrotado, o jogador recebe XP
-5. quando a XP acumulada atinge o valor necessário, o personagem sobe de nível
+```text
+1 - Explorar
+2 - Inventário
+3 - Status
+4 - Habilidades
+5 - Salvar jogo
+6 - Carregar jogo
+7 - Sair
+```
 
-## Observações finais
+Na Floresta Sombria, escolha a estrada, entre na floresta ou procure itens. Eventos incluem combates, tesouros, NPCs, armadilhas e achados raros. Vença três encontros para chegar ao Rei Goblin, chefe com 250 HP e um golpe especial periódico.
 
-Esse projeto foi organizado para demonstrar de forma clara a aplicação dos paradigmas de programação, especialmente em relação à montagem de classes e à separação de responsabilidades. A estrutura modular facilita a explicação para o professor, pois cada diretório representa uma camada funcional do sistema.
+Durante o combate:
 
-A proposta não é apenas criar um jogo funcional, mas também apresentar uma solução bem organizada e coerente com os princípios da Programação Orientada a Objetos.
+```text
+1 - Ataque
+2 - Habilidade
+3 - Usar poção
+4 - Defender
+5 - Fugir
+```
+
+Entradas inválidas não consomem o turno. Habilidades usam mana; defesa reduz o próximo dano e poções são consumidas do inventário. O progresso pode ser salvo em `save.json` na pasta atual.
+
+## Estrutura e classes principais
+
+```text
+main.py                    Entrada; modo terminal ou Pygame
+jogo/terminal.py           Menus, exploração e eventos
+jogo/batalha_terminal.py   Turnos e regras da batalha terminal
+jogo/salvamento.py         Persistência JSON
+jogo/jogo.py               Interface Pygame original
+jogo/combate.py            Combate da interface Pygame
+jogo/eventos.py            Teclado da interface Pygame
+graficos/renderizador.py   Desenho da interface Pygame
+personagens/personagem.py  Classe base abstrata e regras comuns
+personagens/jogador.py     Jogador, habilidades e progressão
+personagens/inimigo.py     Inimigo, Goblin, Orc, Mago e Chefe
+personagens/inventario.py  Itens, quantidades e equipamentos
+personagens/habilidade.py  Definições de habilidades
+tests/                     Testes automatizados
+```
+
+## Conceitos de POO utilizados
+
+- **Abstração:** `Personagem` é uma classe abstrata que define dados e operações comuns e exige a implementação de `acao_turno`.
+- **Herança:** `Jogador` e `Inimigo` especializam `Personagem`; Goblin, Orc, Mago e Chefe especializam `Inimigo`.
+- **Polimorfismo:** a batalha chama `acao_turno` sem precisar conhecer o tipo concreto. O Mago atravessa parte da defesa e o Chefe usa um golpe especial a cada três turnos.
+- **Encapsulamento:** vida, ataque e defesa são armazenados em atributos protegidos; propriedades mantêm vida dentro de `0..vida_maxima` e atributos não negativos.
+- **Composição:** `Jogador` possui um `Inventario` e um conjunto de `Habilidade`; `JogoTerminal` coordena jogador, exploração, batalha e salvamento.
+- **Separação de responsabilidades:** regras de personagens, batalha, interface, exploração e JSON ficam em módulos distintos.
+
+## Testes
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+Os testes cobrem as regras existentes de seleção/respawn da interface e as regras de vida, combate, habilidades, XP, inventário, equipamentos, chefe e save/load.

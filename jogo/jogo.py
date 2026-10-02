@@ -1,18 +1,22 @@
-import pygame
-
-from graficos.renderizador import Renderizador
 from personagens.inimigo import Inimigo
 from personagens.jogador import Jogador
 
 from .combate import Combate
-from .eventos import Eventos
 
 
 class Jogo:
     """Classe principal que controla a lógica geral do RPG."""
 
     def __init__(self):
+        # O modo terminal não depende de Pygame; carregue-o só ao abrir a janela.
+        import pygame
+
+        from graficos.renderizador import Renderizador
+
+        from .eventos import Eventos
+
         # Inicializa a biblioteca gráfica do Pygame.
+        self.pygame = pygame
         pygame.init()
 
         # Configura a área de exibição da janela do jogo.
@@ -82,7 +86,7 @@ class Jogo:
             self.desenhar()
             self.relogio.tick(60)
 
-        pygame.quit()
+        self.pygame.quit()
 
     def processar_eventos(self):
         """Encaminha eventos do teclado para o módulo de eventos."""
@@ -130,7 +134,7 @@ class Jogo:
         # Ajusta as estatísticas do novo goblin usando a escala progressiva
         # pedida pelo jogador: vida +15% e ataque +10% em relação ao goblin
         # que foi derrotado.
-        base_vida = getattr(inimigo_derrotado, "vida", 50)
+        base_vida = getattr(inimigo_derrotado, "vida_maxima", 50)
         base_ataque = getattr(inimigo_derrotado, "ataque", 15)
 
         novo_goblin = Inimigo(
@@ -186,22 +190,22 @@ class Jogo:
 
     def atualizar(self):
         """Atualiza a posição do jogador conforme as teclas pressionadas."""
-        teclas = pygame.key.get_pressed()
+        teclas = self.pygame.key.get_pressed()
 
         # Movimentação para cima.
-        if teclas[pygame.K_w]:
+        if teclas[self.pygame.K_w]:
             self.jogador_y -= self.velocidade
 
         # Movimentação para baixo.
-        if teclas[pygame.K_s]:
+        if teclas[self.pygame.K_s]:
             self.jogador_y += self.velocidade
 
         # Movimentação para esquerda.
-        if teclas[pygame.K_a]:
+        if teclas[self.pygame.K_a]:
             self.jogador_x -= self.velocidade
 
         # Movimentação para direita.
-        if teclas[pygame.K_d]:
+        if teclas[self.pygame.K_d]:
             self.jogador_x += self.velocidade
 
         # Limita a movimentação dentro da tela.

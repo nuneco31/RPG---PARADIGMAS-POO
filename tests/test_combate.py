@@ -2,6 +2,7 @@ import unittest
 
 from jogo.combate import Combate
 from jogo.jogo import Jogo
+from personagens.jogador import Jogador
 
 
 class JogadorFake:
@@ -95,20 +96,13 @@ class TestRespawn(unittest.TestCase):
 
         self.assertIs(jogo.alvo_atual, jogo.inimigo2)
 
-    def test_percentuais_de_progressao_do_jogador_e_inimigo(self):
-        jogador = type('JogadorFake', (), {'nivel': 1, 'ataque': 20, 'vida': 100})()
-        jogador.vida = 100
-        jogador.ataque = 20
-
-        novo_ataque = jogador.ataque * 1.25
-        nova_vida = jogador.vida * 1.23
-        vida_goblin = 50 * 1.15
-        ataque_goblin = 15 * 1.10
-
-        self.assertAlmostEqual(novo_ataque, 25.0)
-        self.assertAlmostEqual(nova_vida, 123.0)
-        self.assertAlmostEqual(vida_goblin, 57.5)
-        self.assertAlmostEqual(ataque_goblin, 16.5)
+    def test_progressao_executa_level_up_real(self):
+        jogador = Jogador("Teste")
+        jogador.ganhar_xp(100)
+        self.assertEqual(jogador.nivel, 2)
+        self.assertEqual(jogador.xp, 0)
+        self.assertEqual(jogador.ataque, 24)
+        self.assertEqual(jogador.vida_maxima, 120)
 
 
 if __name__ == '__main__':
