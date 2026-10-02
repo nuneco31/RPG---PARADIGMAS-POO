@@ -1,12 +1,11 @@
 # RPG Aventura — Paradigmas da Programação / POO
 
-RPG didático em Python com uma campanha curta por terminal. O projeto demonstra POO por meio de personagens, inimigos com comportamentos próprios, combate em turnos, inventário composto e progressão. A interface Pygame original continua disponível como modo gráfico opcional.
+RPG didático em Python com uma interface gráfica Pygame e uma campanha alternativa por terminal. O projeto demonstra POO por meio de personagens, inimigos com comportamentos próprios, combate em turnos, inventário composto e progressão.
 
 ## Requisitos e instalação
 
 - Python 3.10 ou superior.
-- O modo terminal não precisa de bibliotecas externas.
-- Para abrir a interface gráfica opcional, instale Pygame Community Edition:
+- O modo Pygame requer Pygame Community Edition:
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -20,11 +19,13 @@ Na pasta do projeto:
 python main.py
 ```
 
-Isso inicia a aventura de terminal. Para executar a interface gráfica preservada:
+Isso abre o jogo em Pygame. Para iniciar a campanha de terminal, sem dependências externas:
 
 ```powershell
-python main.py --pygame
+python main.py --terminal
 ```
+
+No Pygame, use `W`, `A`, `S`, `D` para mover, `1` ou `2` para selecionar um Goblin e `Espaço` para atacar.
 
 ## Como jogar
 
