@@ -6,3 +6,7 @@ __pycache__/
 .pytest_cache/
 .vscode/
 .DS_Store
+.dependencias/
+save.json
+save-teste.json
+*.tmp

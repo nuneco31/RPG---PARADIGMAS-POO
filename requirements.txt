@@ -1,2 +1,2 @@
-# Necessário somente para o modo gráfico opcional (--pygame).
+# Modo gráfico padrão. O terminal (--terminal) usa apenas a biblioteca padrão.
 pygame-ce>=2.5,<3

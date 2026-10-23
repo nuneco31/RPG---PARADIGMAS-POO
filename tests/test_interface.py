@@ -66,6 +66,55 @@ class TestInterfaceGrafica(unittest.TestCase):
         self.assertIsInstance(self.jogo.inimigo, Chefe)
         self.jogo.renderizador.desenhar()
 
+    def test_fila_de_cliques_nao_reutiliza_botoes_da_tela_anterior(self):
+        pygame = self.jogo.pygame
+        self.jogo._evento("npc")
+        self.jogo.renderizador.desenhar()
+        retangulo = next(rect for rect, acao in self.jogo.botoes if acao == "aceitar_pocao")
+        quantidade = self.jogo.jogador.inventario.quantidade("Poção de Vida")
+        pygame.event.clear()
+        for _ in range(2):
+            pygame.event.post(pygame.event.Event(
+                pygame.MOUSEBUTTONDOWN, button=1, pos=retangulo.center
+            ))
+        self.jogo.eventos.processar()
+        self.assertEqual(self.jogo.jogador.inventario.quantidade("Poção de Vida"), quantidade + 1)
+
+    def test_fechar_janela_e_processado_apos_um_clique(self):
+        pygame = self.jogo.pygame
+        self.jogo.renderizador.desenhar()
+        retangulo = next(rect for rect, acao in self.jogo.botoes if acao == "explorar")
+        pygame.event.clear()
+        pygame.event.post(pygame.event.Event(
+            pygame.MOUSEBUTTONDOWN, button=1, pos=retangulo.center
+        ))
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
+        self.jogo.eventos.processar()
+        self.assertFalse(self.jogo.rodando)
+
+    def test_escape_retorna_a_origem_e_preserva_batalha(self):
+        pygame = self.jogo.pygame
+        self.jogo.acionar("explorar")
+        self.jogo.acionar("caderno")
+        pygame.event.clear()
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE))
+        self.jogo.eventos.processar()
+        self.assertEqual(self.jogo.estado, "exploracao")
+        self.jogo._evento("inimigo")
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE))
+        self.jogo.eventos.processar()
+        self.assertEqual(self.jogo.estado, "combate")
+
+    def test_pocao_de_mana_permanece_acessivel_sem_pocao_de_vida(self):
+        self.jogo.jogador.inventario.remover("Poção de Vida", 2)
+        self.jogo.jogador.mana = 0
+        self.jogo._evento("inimigo")
+        self.jogo.renderizador.desenhar()
+        self.assertTrue(any(acao == "combate:3" for _, acao in self.jogo.botoes))
+        self.jogo.acionar("combate:3")
+        self.assertEqual(self.jogo.jogador.mana, 15)
+        self.assertEqual(self.jogo.jogador.inventario.quantidade("Poção de Mana"), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

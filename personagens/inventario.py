@@ -35,7 +35,8 @@ class Inventario:
         return ITENS[nome]
 
     def adicionar(self, nome, quantidade=1):
-        if nome not in ITENS or quantidade < 1:
+        if (nome not in ITENS or isinstance(quantidade, bool)
+                or not isinstance(quantidade, int) or quantidade < 1):
             return False
         self._itens[nome] = self._itens.get(nome, 0) + quantidade
         return True
@@ -44,7 +45,8 @@ class Inventario:
         return self._itens.get(nome, 0)
 
     def remover(self, nome, quantidade=1):
-        if quantidade < 1 or self.quantidade(nome) < quantidade:
+        if (isinstance(quantidade, bool) or not isinstance(quantidade, int)
+                or quantidade < 1 or self.quantidade(nome) < quantidade):
             return False
         restante = self._itens[nome] - quantidade
         if restante:
@@ -83,10 +85,24 @@ class Inventario:
         return {"itens": dict(self._itens), "equipamentos": dict(self._equipamentos)}
 
     def carregar(self, dados):
+        """Preserva também equipamentos na mochila e valida antes de aplicar."""
+        if not isinstance(dados, dict):
+            raise ValueError("Inventário inválido.")
         itens = dados.get("itens", {})
-        self._itens = {nome: int(qtd) for nome, qtd in itens.items()
-                       if nome in ITENS and ITENS[nome].tipo in ("cura", "mana") and int(qtd) > 0}
-        self._equipamentos = {}
-        for tipo, nome in dados.get("equipamentos", {}).items():
-            if tipo in ("arma", "escudo") and nome in ITENS and ITENS[nome].tipo == tipo:
-                self._equipamentos[tipo] = nome
+        equipamentos = dados.get("equipamentos", {})
+        if not isinstance(itens, dict) or not isinstance(equipamentos, dict):
+            raise ValueError("Itens ou equipamentos inválidos.")
+        novos_itens = {}
+        for nome, quantidade in itens.items():
+            if (nome not in ITENS or isinstance(quantidade, bool)
+                    or not isinstance(quantidade, int) or quantidade < 1):
+                raise ValueError("Item ou quantidade inválida no inventário.")
+            novos_itens[nome] = quantidade
+        novos_equipamentos = {}
+        for tipo, nome in equipamentos.items():
+            if (tipo not in ("arma", "escudo") or not isinstance(nome, str)
+                    or nome not in ITENS or ITENS[nome].tipo != tipo):
+                raise ValueError("Equipamento inválido no inventário.")
+            novos_equipamentos[tipo] = nome
+        self._itens = novos_itens
+        self._equipamentos = novos_equipamentos

@@ -58,19 +58,13 @@ class Personagem(ABC):
         return self.vida - vida_anterior
 
     def mostrar_status(self):
-        """Mostra os atributos do personagem no console."""
-        print(f"\n--- {self.nome} ---")
-        print(f"Vida: {self.vida}")
-        print(f"Ataque: {self.ataque}")
-        print(f"Defesa: {self.defesa}")
+        """Retorna texto para que cada interface escolha como apresentá-lo."""
+        return (f"{self.nome}\nVida: {self.vida}/{self.vida_maxima}\n"
+                f"Ataque: {self.ataque}\nDefesa: {self.defesa}")
 
     def atacar(self, alvo):
         """Aplica dano ao alvo, considerando a defesa dele."""
-        dano = alvo.receber_dano(self.ataque)
-
-        print(f"{self.nome} atacou {alvo.nome}!")
-        print(f"Dano causado: {dano}")
-        return dano
+        return alvo.receber_dano(self.ataque)
 
     def esta_vivo(self):
         """Retorna verdadeiro se a vida for maior que zero."""

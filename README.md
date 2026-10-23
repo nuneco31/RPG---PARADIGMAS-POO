@@ -1,72 +1,102 @@
-# RPG Aventura — Paradigmas da Programação / POO
+# Crônicas da Floresta
 
-RPG didático em Python com uma interface gráfica Pygame e uma campanha alternativa por terminal. O projeto demonstra POO por meio de personagens, inimigos com comportamentos próprios, combate em turnos, inventário composto e progressão.
+RPG acadêmico em Python para estudar **Programação Orientada a Objetos** com uma aventura curta. Explore a floresta, equipe seu personagem e vença três encontros para enfrentar o Rei Goblin. A interface gráfica e o terminal usam o mesmo núcleo de campanha e combate.
 
-## Requisitos e instalação
+Os personagens guardam suas regras, a campanha organiza as etapas, as interfaces recebem comandos e o renderizador desenha a tela.
 
-- Python 3.10 ou superior.
-- O modo Pygame requer Pygame Community Edition:
+![Tela inicial de Crônicas da Floresta](docs/imagens/inicio.png)
 
-```powershell
-python -m pip install -r requirements.txt
-```
+## Executar
 
-## Como executar
-
-Na pasta do projeto:
+Requer Python 3.10 ou superior. Na pasta do projeto:
 
 ```powershell
-python main.py
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe main.py
 ```
 
-Isso abre a campanha completa em uma janela Pygame. Para iniciar a versão alternativa de terminal:
+O comando padrão abre o jogo gráfico com Pygame Community Edition. Para jogar pelo terminal:
+
+```powershell
+.\.venv\Scripts\python.exe main.py --terminal
+```
+
+O terminal usa a biblioteca padrão e pode ser executado sem instalar Pygame:
 
 ```powershell
 python main.py --terminal
 ```
 
-No Pygame, jogue clicando nos botões de explorar, inventário, status, habilidades e salvar. Durante a batalha, clique em ataque, habilidade, poção, defender ou fugir. O modo gráfico agora apresenta a campanha, os eventos e o chefe; a alternativa de terminal segue disponível pelo comando acima.
+Use `--seed 7` para repetir a sequência de sorteios de uma demonstração e `--save minha-partida.json` para escolher outro arquivo de salvamento. A sequência também depende das escolhas feitas durante a partida.
 
-## Como jogar
+## Jogar
 
-No menu principal, clique em **Explorar**, **Inventário**, **Status**, **Habilidades**, **Salvar jogo** ou **Carregar jogo**. Na exploração, escolha a estrada, entre na floresta ou procure itens. Eventos incluem combates, tesouros, NPCs, armadilhas e achados raros. Vença três encontros para chegar ao Rei Goblin, chefe com 250 HP e um golpe especial periódico.
+- **Explorar:** escolha a estrada ou a floresta. A floresta tem maior frequência de inimigos; ambas oferecem tesouros, encontros com uma curandeira e armadilhas.
+- **Preparar o personagem:** consulte atributos e habilidades; use poções ou equipe a espada e o escudo no inventário.
+- **Combater:** ataque, escolha uma habilidade, use uma poção, defenda ou tente fugir. Uma escolha inválida não consome o turno.
+- **Progredir:** três vitórias comuns liberam o chefe. Fugir ou perder não conta como vitória; após uma derrota, o personagem recupera metade da vida.
+- **Estudar:** abra o Caderno POO da interface gráfica para relacionar os conceitos às classes do projeto.
 
-Durante o combate, clique em **Atacar**, **Habilidade**, **Usar poção**, **Defender** ou **Fugir**. Habilidades usam mana; defesa reduz o próximo dano e poções são consumidas do inventário. O progresso pode ser salvo em `save.json` na pasta atual. Pressione `Esc` para voltar de uma tela ou fechar o jogo no menu principal.
+Na janela de 1000 × 700, use o mouse nos botões centrais e na barra lateral. A mochila mostra quatro tipos de item por página, com botões **Anterior** e **Próxima**. Habilidades sem mana suficiente ficam inativas. Durante o combate, a navegação lateral fica bloqueada; o botão **Sair** continua disponível.
 
-## Estrutura e classes principais
+`Esc` volta de telas auxiliares, fecha a seleção de habilidade ou continua após o resultado de uma batalha. Durante o turno de combate, ele não abandona o encontro. No acampamento ou na conclusão, `Esc` fecha o jogo.
+
+O salvamento padrão fica em `save.json` **na pasta do projeto**, mesmo quando o programa é iniciado de outra pasta. Ele guarda atributos, inventário, equipamento e progresso da campanha. A batalha em andamento não é salva; salvar e carregar ficam disponíveis fora dela.
+
+## Entender o código
 
 ```text
-main.py                    Entrada; inicia a campanha Pygame ou modo terminal
-jogo/interface.py          Fluxo da campanha gráfica
-jogo/interface_eventos.py  Cliques e teclas da interface
-jogo/interface_renderizador.py Desenho das telas e botões
-jogo/terminal.py           Menus, exploração e eventos
-jogo/batalha_terminal.py   Turnos e regras da batalha terminal
-jogo/salvamento.py         Persistência JSON
-jogo/jogo.py               Protótipo gráfico anterior preservado
-jogo/combate.py            Combate do protótipo gráfico anterior
-graficos/renderizador.py   Renderização do protótipo gráfico anterior
-personagens/personagem.py  Classe base abstrata e regras comuns
-personagens/jogador.py     Jogador, habilidades e progressão
-personagens/inimigo.py     Inimigo, Goblin, Orc, Mago e Chefe
-personagens/inventario.py  Itens, quantidades e equipamentos
-personagens/habilidade.py  Definições de habilidades
-tests/                     Testes automatizados
+main.py                        Escolhe interface gráfica ou terminal
+jogo/campanha.py                Fluxo compartilhado da aventura
+jogo/batalha.py                 Motor de turnos, usado pelos dois modos
+jogo/batalha_terminal.py        Adaptador textual para o motor de turnos
+jogo/interface.py               Adaptador Pygame e ciclo da janela
+jogo/interface_eventos.py       Entrada de mouse e teclado
+jogo/terminal.py                Entrada e saída de texto
+jogo/salvamento.py              Persistência JSON validada
+graficos/interface_renderizador.py  Telas, tema e desenho procedural
+graficos/componentes.py         Painéis, textos e botões reutilizáveis
+graficos/ilustracoes.py          Personagens e cenário desenhados por código
+graficos/tema.py                 Paleta e estilos compartilhados
+personagens/personagem.py       Contrato abstrato e atributos comuns
+personagens/jogador.py          Jogador, mana, defesa e progressão
+personagens/inimigo.py          Inimigos e ações especializadas
+personagens/inventario.py       Itens e equipamentos por composição
+personagens/habilidade.py       Catálogo de habilidades
+tests/                         Regressões de regras e interfaces
+docs/                          Arquitetura e roteiro de apresentação
 ```
 
-## Conceitos de POO utilizados
+O motor em `jogo/batalha.py` executa uma ação sem ler entrada nem desenhar uma janela. O adaptador `batalha_terminal.py` acrescenta o método `lutar`, com perguntas e mensagens do console. Os arquivos de protótipo preservados são explicados na [arquitetura](docs/ARQUITETURA.md).
 
-- **Abstração:** `Personagem` é uma classe abstrata que define dados e operações comuns e exige a implementação de `acao_turno`.
-- **Herança:** `Jogador` e `Inimigo` especializam `Personagem`; Goblin, Orc, Mago e Chefe especializam `Inimigo`.
-- **Polimorfismo:** a batalha chama `acao_turno` sem precisar conhecer o tipo concreto. O Mago atravessa parte da defesa e o Chefe usa um golpe especial a cada três turnos.
-- **Encapsulamento:** vida, ataque e defesa são armazenados em atributos protegidos; propriedades mantêm vida dentro de `0..vida_maxima` e atributos não negativos.
-- **Composição:** `Jogador` possui um `Inventario` e um conjunto de `Habilidade`; `JogoInterface` coordena jogador, telas, exploração, batalha e salvamento.
-- **Separação de responsabilidades:** regras de personagens, batalha, interface, exploração e JSON ficam em módulos distintos.
+### POO no projeto
 
-## Testes
+| Conceito | Exemplo concreto |
+| --- | --- |
+| Abstração | `Personagem` exige a implementação de `acao_turno`. |
+| Herança | `Jogador` e `Inimigo` herdam de `Personagem`; os tipos de inimigo especializam `Inimigo`. |
+| Polimorfismo | `Batalha` chama `inimigo.acao_turno(jogador)`; Mago e Chefe executam comportamentos próprios. |
+| Encapsulamento | Propriedades limitam vida e atributos; o inventário entrega cópias de seus dicionários. |
+| Composição | `Jogador` possui `Inventario`; a interface gráfica possui uma `Campanha`. |
+
+O paradigma principal é POO. Há também fluxo imperativo para turnos e menus, além de dados imutáveis nos catálogos de itens e habilidades. Isso não torna o projeto uma implementação completa de todos os paradigmas.
+
+Leia a [explicação da arquitetura](docs/ARQUITETURA.md) e use o [roteiro de apresentação](docs/APRESENTACAO.md) para preparar a demonstração.
+
+## Verificar
+
+Com as dependências gráficas instaladas:
 
 ```powershell
-python -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Os testes cobrem as regras existentes de seleção/respawn da interface e as regras de vida, combate, habilidades, XP, inventário, equipamentos, chefe e save/load.
+Os testes gráficos usam os drivers `dummy` do SDL e não precisam abrir uma janela visível. A suíte verifica combate, habilidades, inventário, progressão, salvamento, transições de campanha e integração básica com cliques. A aparência da interface também deve ser conferida visualmente; testes automatizados não garantem toda a experiência de uso.
+
+Para executar apenas os novos testes do núcleo, sem Pygame:
+
+```powershell
+python -m unittest discover -s tests -p test_campanha.py -v
+python -m unittest discover -s tests -p test_persistencia.py -v
+```

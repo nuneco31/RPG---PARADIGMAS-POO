@@ -25,7 +25,7 @@ class Inimigo(Personagem):
 
     def provocar(self):
         """Mensagem de provocação do inimigo."""
-        print(f"{self.nome}: Você não vai conseguir me derrotar!")
+        return f"{self.nome}: Você não vai conseguir me derrotar!"
 
     def acao_turno(self, alvo):
         """Comportamento padrão: ataque direto, substituível por subclasses."""
@@ -51,6 +51,7 @@ class Mago(Inimigo):
 
     def acao_turno(self, alvo):
         """O ataque mágico atravessa parte da defesa do alvo."""
+        self._ultima_acao = "Rajada Arcana"
         return alvo.receber_dano(self.ataque + alvo.defesa // 2)
 
 
