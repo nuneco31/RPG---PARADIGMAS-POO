@@ -1,102 +1,202 @@
 # Crônicas da Floresta
 
-RPG acadêmico em Python para estudar **Programação Orientada a Objetos** com uma aventura curta. Explore a floresta, equipe seu personagem e vença três encontros para enfrentar o Rei Goblin. A interface gráfica e o terminal usam o mesmo núcleo de campanha e combate.
+RPG em **console**, desenvolvido em Python para o trabalho de Paradigmas de Programação: **POO e os cinco princípios SOLID**. Escolha Guerreiro, Mago ou Arqueiro, explore a floresta, organize o inventário e vença três encontros para enfrentar o Rei Goblin.
 
-Os personagens guardam suas regras, a campanha organiza as etapas, as interfaces recebem comandos e o renderizador desenha a tela.
+## Executar no console
 
-![Tela inicial de Crônicas da Floresta](docs/imagens/inicio.png)
+Requer **Python 3.10 ou superior**. O console usa somente a biblioteca padrão: não precisa instalar dependências nem compilar.
 
-## Executar
+```sh
+git clone https://github.com/nuneco31/RPG---PARADIGMAS-POO.git
+cd RPG---PARADIGMAS-POO
+python main.py
+```
 
-Requer Python 3.10 ou superior. Na pasta do projeto:
+Na abertura, escolha a classe e o nome. Use os números dos menus para jogar. Para iniciar diretamente com um personagem e repetir os sorteios de uma demonstração:
+
+```sh
+python main.py --classe mago --nome Lia --seed 7
+```
+
+`--terminal` continua disponível como opção explícita. `--save minha-partida.json` escolhe outro arquivo de salvamento. `python main.py --help` lista as opções. Em sistemas que usam o nome `python3`, substitua `python` nos comandos.
+
+## Personagens e regras
+
+| Classe | Vida | Ataque | Defesa | Mana | Esquiva | Habilidades |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Guerreiro | 120 | 22 | 8 | 25 | 5% | Golpe Poderoso, Cura |
+| Mago | 80 | 16 | 3 | 60 | 8% | Bola de Fogo, Cura de 40 HP |
+| Arqueiro | 95 | 24 | 4 | 35 | 20% | Flecha Precisa, Ataque Rápido, Cura |
+
+Os tipos de jogador são modelados por **composição**: `Jogador` possui uma `Vocacao` imutável e habilidades. Isso evita subclasses que apenas repetiriam métodos com números diferentes. A herança aparece em `Personagem`, nos inimigos e nas habilidades.
+
+- **Exploração:** estrada e floresta oferecem inimigos, tesouros, armadilhas e uma curandeira. A floresta tem mais encontros hostis.
+- **Combate por turnos:** ataque, habilidade, poção, defesa ou fuga. Ação inválida ou sem mana não consome o turno. O inimigo sobrevivente responde à ação válida.
+- **Inventário:** poções de vida e mana, espada e escudo. Digite o nome do item para usar ou `E` para equipar.
+- **Progressão:** derrotar inimigos concede XP. Subir de nível aumenta atributos e recupera vida e mana. Três vitórias comuns liberam o chefe; fugir ou perder não conta como vitória.
+- **Derrota:** o personagem volta em segurança com metade da vida. Derrotar o Rei Goblin conclui a missão, e a exploração continua disponível.
+- **Persistência:** salve e carregue fora do combate. O JSON guarda classe, atributos, inventário, equipamento e progresso. Arquivos antigos sem classe usam o perfil compatível `Aventureiro`.
+
+O salvamento padrão fica em `save.json` ao lado de `main.py`, mesmo quando o programa é iniciado de outra pasta. Uma batalha em andamento não é persistida.
+
+## Execução no console
+
+As imagens mostram **saída real do programa registrada e renderizada em PNG**. Os textos completos estão em [início](docs/imagens/console-inicio.txt) e [combate](docs/imagens/console-combate.txt); não são resultados de batalha escritos à mão nem capturas de uma janela do sistema.
+
+![Escolha de personagem no console](docs/imagens/console-inicio.png)
+
+![Mago usando Bola de Fogo e vencendo um Goblin](docs/imagens/console-combate.png)
+
+Para reproduzir o combate, execute `python main.py --classe mago --nome Lia --seed 7` e escolha: `1` (explorar), `2` (floresta), `2` (habilidade), `Enter` (Bola de Fogo), `1` (ataque) e `7` (sair). A mesma semente depende também das mesmas escolhas. Com a dependência gráfica instalada, `python scripts/registrar_console.py` atualiza os registros e imagens.
+
+## POO no código
+
+| Conceito | Onde aparece |
+| --- | --- |
+| Abstração | `Personagem(ABC)` define o contrato abstrato `acao_turno`. |
+| Encapsulamento | Propriedades limitam vida e mana; `Inventario` retorna cópias de seus dicionários. |
+| Herança | `Jogador` e `Inimigo` herdam de `Personagem`; os inimigos especializam `Inimigo`; `HabilidadeCura` especializa `Habilidade`. |
+| Polimorfismo | `Batalha` chama `inimigo.acao_turno(jogador)`; `Jogador` chama `habilidade.aplicar(...)`. O objeto concreto define o comportamento. |
+| Composição | `Jogador` possui `Inventario` e `Vocacao`; a apresentação possui `Campanha`. |
+
+## Os cinco princípios SOLID
+
+### S — Single Responsibility: responsabilidade única
+
+As classes têm motivos distintos para mudar. [Batalha](jogo/batalha.py) resolve turnos; [JogoTerminal](jogo/terminal.py) lê e apresenta texto; [Salvamento](jogo/salvamento.py) trata JSON, validação e gravação atômica. Alterar a aparência de um menu não exige alterar o cálculo de dano. [Inventario](personagens/inventario.py) concentra quantidades e equipamentos; [Jogador](personagens/jogador.py) concentra progressão, mana e uso de habilidades.
+
+### O — Open/Closed: aberto para extensão, fechado para modificação
+
+Uma habilidade nova pode implementar `Habilidade.aplicar` e ser adicionada ao conjunto do jogador sem editar `Batalha`. O motor consulta `jogador.habilidades`, em vez de um catálogo global de golpes permitidos. Chance de crítico e fator de ataque são dados, sem decisões baseadas no nome do golpe. [HabilidadeCura](personagens/habilidade.py) substitui o efeito de dano por cura.
+
+O teste `test_habilidade_nova_e_aceita_sem_alterar_motor` acrescenta um Dreno que causa dano e cura o usuário, demonstrando a extensão durante um combate. Para disponibilizar uma classe nova no menu, ainda é necessário registrá-la em `VOCACOES` e `CLASSES_JOGAVEIS`: o ponto de configuração permanece explícito.
+
+### L — Liskov Substitution: substituição de Liskov
+
+Goblin, Orc, Mago e Chefe atendem ao contrato de `Personagem.acao_turno(alvo)`: aplicam uma ação e retornam o dano real, sem vida negativa. A batalha usa todos pela mesma chamada. A Rajada Arcana do Mago e o golpe periódico do Chefe alteram o comportamento sem exigir métodos especiais do chamador.
+
+`HabilidadeCura` também preserva a assinatura e o significado do retorno de `Habilidade.aplicar`: quantidade efetivamente alterada ou `None` para recusa. Os testes verificam as pós-condições de dano e vida para todos os tipos de inimigo.
+
+### I — Interface Segregation: segregação de interfaces
+
+[LeitorPartida e GravadorPartida](jogo/contratos.py) são dois protocolos pequenos: um exige somente `carregar`, o outro somente `salvar`. A campanha recebe cada capacidade separadamente; um adaptador somente de leitura não precisa implementar gravação com um método que lança “não suportado”.
+
+O teste `test_leitor_e_gravador_independentes_sem_arquivo` injeta dois objetos distintos: um só lê e outro só grava. Os protocolos são estruturais de Python (`typing.Protocol`); não exigem herança nominal nem validam tipos automaticamente em tempo de execução.
+
+### D — Dependency Inversion: inversão de dependência
+
+[Campanha](jogo/campanha.py), que contém o fluxo da aventura, depende dos contratos `LeitorPartida` e `GravadorPartida`. Ela não importa `Salvamento`, não escolhe caminhos e não instancia o adaptador JSON. [criar_campanha](jogo/montagem.py) é o ponto de composição: cria `Salvamento` e o fornece ao núcleo.
+
+Assim, o fluxo de salvar/carregar pode ser testado com adaptadores em memória, sem abrir arquivos. `Salvamento` satisfaz os dois contratos estruturais. Terminal e interface gráfica usam o mesmo ponto de composição.
+
+## Diagrama de classes
+
+Visão do núcleo em UML, renderizada pelo GitHub com Mermaid. Setas tracejadas com triângulo indicam implementação estrutural de protocolos; o losango indica uma relação “possui”. A [versão detalhada](docs/DIAGRAMA_CLASSES.md) inclui as interfaces e seus adaptadores. Guerreiro, Mago e Arqueiro são configurações de `Vocacao`, não subclasses Python.
+
+```mermaid
+classDiagram
+    class Personagem {
+        <<abstract>>
+        -vida
+        -ataque
+        -defesa
+        +receber_dano(quantidade)
+        +acao_turno(alvo)*
+    }
+    class Jogador {
+        +classe
+        +mana
+        +ganhar_xp(quantidade)
+        +aplicar_habilidade(nome, alvo)
+    }
+    class Inimigo {
+        +xp_recompensa
+        +acao_turno(alvo)
+    }
+    class Vocacao {
+        <<immutable>>
+        +nome
+        +habilidades
+    }
+    class Habilidade {
+        +custo_mana
+        +aplicar(usuario, alvo)
+    }
+    class LeitorPartida {
+        <<Protocol>>
+        +carregar(jogador)
+    }
+    class GravadorPartida {
+        <<Protocol>>
+        +salvar(jogador, progresso)
+    }
+    Personagem <|-- Jogador
+    Personagem <|-- Inimigo
+    Inimigo <|-- Goblin
+    Inimigo <|-- Orc
+    Inimigo <|-- Mago
+    Inimigo <|-- Chefe
+    Jogador *-- Inventario
+    Jogador o-- Vocacao
+    Jogador o-- Habilidade
+    Habilidade <|-- HabilidadeCura
+    Campanha *-- Batalha
+    Campanha *-- Jogador
+    Batalha --> Jogador
+    Batalha --> Inimigo
+    Campanha --> LeitorPartida
+    Campanha --> GravadorPartida
+    LeitorPartida <|.. Salvamento
+    GravadorPartida <|.. Salvamento
+```
+
+## Organização
+
+```text
+main.py                    Entrada CLI; console padrão e gráfico opcional
+personagens/               Personagem, Jogador, inimigos, vocações, habilidades e inventário
+jogo/campanha.py            Fluxo e progresso da aventura
+jogo/batalha.py             Motor de turnos sem entrada/saída
+jogo/batalha_terminal.py    Adaptador do combate para texto
+jogo/terminal.py            Menus e criação de personagem
+jogo/contratos.py           Protocolos de leitura e gravação
+jogo/montagem.py            Composição e injeção dos adaptadores
+jogo/salvamento.py          Persistência JSON validada
+jogo/interface*.py         Interface gráfica opcional
+graficos/                  Desenho da interface gráfica
+tests/                     Testes de regras, contratos, persistência e interfaces
+docs/                      UML, arquitetura, roteiro e registros de execução
+```
+
+Leia a [arquitetura](docs/ARQUITETURA.md) e o [roteiro de apresentação](docs/APRESENTACAO.md). Os módulos antigos `jogo/jogo.py`, `jogo/combate.py`, `jogo/eventos.py` e `graficos/renderizador.py` são do protótipo; a entrada atual usa `Campanha` e `Batalha`.
+
+## Interface gráfica opcional
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe main.py
+.\.venv\Scripts\python.exe main.py --grafico --classe arqueiro
 ```
 
-O comando padrão abre o jogo gráfico com Pygame Community Edition. Para jogar pelo terminal:
+Em Linux/macOS, use `.venv/bin/python`. A janela oferece exploração, inventário, combate e Caderno POO. A classe é escolhida por `--classe` (Guerreiro por padrão no modo gráfico). Durante o combate, a navegação lateral fica bloqueada; `Esc` fecha a seleção de habilidade ou continua após o resultado.
 
-```powershell
-.\.venv\Scripts\python.exe main.py --terminal
-```
+![Interface gráfica opcional](docs/imagens/inicio.png)
 
-O terminal usa a biblioteca padrão e pode ser executado sem instalar Pygame:
+## Testar
 
-```powershell
-python main.py --terminal
-```
+Sem dependências externas, execute os testes novos de classes/SOLID, campanha, persistência e CLI:
 
-Use `--seed 7` para repetir a sequência de sorteios de uma demonstração e `--save minha-partida.json` para escolher outro arquivo de salvamento. A sequência também depende das escolhas feitas durante a partida.
-
-## Jogar
-
-- **Explorar:** escolha a estrada ou a floresta. A floresta tem maior frequência de inimigos; ambas oferecem tesouros, encontros com uma curandeira e armadilhas.
-- **Preparar o personagem:** consulte atributos e habilidades; use poções ou equipe a espada e o escudo no inventário.
-- **Combater:** ataque, escolha uma habilidade, use uma poção, defenda ou tente fugir. Uma escolha inválida não consome o turno.
-- **Progredir:** três vitórias comuns liberam o chefe. Fugir ou perder não conta como vitória; após uma derrota, o personagem recupera metade da vida.
-- **Estudar:** abra o Caderno POO da interface gráfica para relacionar os conceitos às classes do projeto.
-
-Na janela de 1000 × 700, use o mouse nos botões centrais e na barra lateral. A mochila mostra quatro tipos de item por página, com botões **Anterior** e **Próxima**. Habilidades sem mana suficiente ficam inativas. Durante o combate, a navegação lateral fica bloqueada; o botão **Sair** continua disponível.
-
-`Esc` volta de telas auxiliares, fecha a seleção de habilidade ou continua após o resultado de uma batalha. Durante o turno de combate, ele não abandona o encontro. No acampamento ou na conclusão, `Esc` fecha o jogo.
-
-O salvamento padrão fica em `save.json` **na pasta do projeto**, mesmo quando o programa é iniciado de outra pasta. Ele guarda atributos, inventário, equipamento e progresso da campanha. A batalha em andamento não é salva; salvar e carregar ficam disponíveis fora dela.
-
-## Entender o código
-
-```text
-main.py                        Escolhe interface gráfica ou terminal
-jogo/campanha.py                Fluxo compartilhado da aventura
-jogo/batalha.py                 Motor de turnos, usado pelos dois modos
-jogo/batalha_terminal.py        Adaptador textual para o motor de turnos
-jogo/interface.py               Adaptador Pygame e ciclo da janela
-jogo/interface_eventos.py       Entrada de mouse e teclado
-jogo/terminal.py                Entrada e saída de texto
-jogo/salvamento.py              Persistência JSON validada
-graficos/interface_renderizador.py  Telas, tema e desenho procedural
-graficos/componentes.py         Painéis, textos e botões reutilizáveis
-graficos/ilustracoes.py          Personagens e cenário desenhados por código
-graficos/tema.py                 Paleta e estilos compartilhados
-personagens/personagem.py       Contrato abstrato e atributos comuns
-personagens/jogador.py          Jogador, mana, defesa e progressão
-personagens/inimigo.py          Inimigos e ações especializadas
-personagens/inventario.py       Itens e equipamentos por composição
-personagens/habilidade.py       Catálogo de habilidades
-tests/                         Regressões de regras e interfaces
-docs/                          Arquitetura e roteiro de apresentação
-```
-
-O motor em `jogo/batalha.py` executa uma ação sem ler entrada nem desenhar uma janela. O adaptador `batalha_terminal.py` acrescenta o método `lutar`, com perguntas e mensagens do console. Os arquivos de protótipo preservados são explicados na [arquitetura](docs/ARQUITETURA.md).
-
-### POO no projeto
-
-| Conceito | Exemplo concreto |
-| --- | --- |
-| Abstração | `Personagem` exige a implementação de `acao_turno`. |
-| Herança | `Jogador` e `Inimigo` herdam de `Personagem`; os tipos de inimigo especializam `Inimigo`. |
-| Polimorfismo | `Batalha` chama `inimigo.acao_turno(jogador)`; Mago e Chefe executam comportamentos próprios. |
-| Encapsulamento | Propriedades limitam vida e atributos; o inventário entrega cópias de seus dicionários. |
-| Composição | `Jogador` possui `Inventario`; a interface gráfica possui uma `Campanha`. |
-
-O paradigma principal é POO. Há também fluxo imperativo para turnos e menus, além de dados imutáveis nos catálogos de itens e habilidades. Isso não torna o projeto uma implementação completa de todos os paradigmas.
-
-Leia a [explicação da arquitetura](docs/ARQUITETURA.md) e use o [roteiro de apresentação](docs/APRESENTACAO.md) para preparar a demonstração.
-
-## Verificar
-
-Com as dependências gráficas instaladas:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
-
-Os testes gráficos usam os drivers `dummy` do SDL e não precisam abrir uma janela visível. A suíte verifica combate, habilidades, inventário, progressão, salvamento, transições de campanha e integração básica com cliques. A aparência da interface também deve ser conferida visualmente; testes automatizados não garantem toda a experiência de uso.
-
-Para executar apenas os novos testes do núcleo, sem Pygame:
-
-```powershell
+```sh
+python -m unittest discover -s tests -p test_solid_e_classes.py -v
 python -m unittest discover -s tests -p test_campanha.py -v
 python -m unittest discover -s tests -p test_persistencia.py -v
+python -m unittest discover -s tests -p test_entrada.py -v
 ```
+
+Para a suíte completa, instale `requirements.txt` e execute:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+Os testes gráficos usam drivers SDL `dummy`. A suíte cobre dano, progressão, habilidades, extensão do motor, contratos de persistência, classes nos salvamentos, compatibilidade com partidas antigas, transições e cliques. O teste da entrada padrão executa Python com `-S`, comprovando que o console não depende dos pacotes gráficos instalados.

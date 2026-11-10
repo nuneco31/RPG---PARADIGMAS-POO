@@ -3,7 +3,7 @@ import random
 from personagens.inimigo import Chefe, Goblin, Mago, Orc
 from personagens.jogador import Jogador
 from jogo.batalha import Batalha
-from jogo.salvamento import Salvamento
+from jogo.contratos import LeitorPartida, GravadorPartida
 
 
 class Campanha:
@@ -12,17 +12,19 @@ class Campanha:
     TELAS_AUXILIARES = ("inventario", "status", "habilidades", "caderno")
     ESTADOS_BATALHA = ("combate", "selecionar_habilidade", "fim_batalha")
 
-    def __init__(self, rng=None, caminho_save=None):
+    def __init__(self, rng=None, *, leitor: LeitorPartida, gravador: GravadorPartida,
+                 jogador=None):
         self.rodando = True
 
-        self.jogador = Jogador("Arthur")
+        self.jogador = jogador if jogador is not None else Jogador("Arthur")
         self.jogador.inventario.adicionar("Poção de Vida", 2)
         self.jogador.inventario.adicionar("Poção de Mana")
         self.jogador.inventario.adicionar("Espada de Ferro")
         self.jogador.inventario.adicionar("Escudo de Ferro")
         self.progresso = {"encontros": 0, "chefe_derrotado": False}
         self.rng = rng or random.Random()
-        self.salvamento = Salvamento(caminho_save)
+        self.leitor = leitor
+        self.gravador = gravador
 
         self.estado = "menu"
         self.estado_anterior = "menu"
@@ -216,7 +218,7 @@ class Campanha:
             self.mensagem = "Conclua a batalha antes de salvar."
             return
         try:
-            self.salvamento.salvar(self.jogador, self.progresso)
+            self.gravador.salvar(self.jogador, self.progresso)
             self.mensagem = "Jogo salvo com sucesso."
         except (OSError, ValueError, TypeError) as erro:
             self.mensagem = f"Não foi possível salvar o jogo: {erro}"
@@ -226,7 +228,7 @@ class Campanha:
             self.mensagem = "Conclua a batalha antes de carregar."
             return
         try:
-            self.progresso = self.salvamento.carregar(self.jogador)
+            self.progresso = self.leitor.carregar(self.jogador)
             self.batalha = None
             self.inimigo = None
             self.resultado_batalha = None

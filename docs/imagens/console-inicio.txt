@@ -1,0 +1,39 @@
+
+================================================
+ CRÔNICAS DA FLORESTA — RPG DE PARADIGMAS
+================================================
+Escolha seu personagem (ou digite sair):
+1 - Guerreiro: HP 120, ataque 22, defesa 8, mana 25
+    Habilidades: Golpe Poderoso, Cura
+2 - Mago: HP 80, ataque 16, defesa 3, mana 60
+    Habilidades: Bola de Fogo, Cura
+3 - Arqueiro: HP 95, ataque 24, defesa 4, mana 35
+    Habilidades: Flecha Precisa, Ataque Rápido, Cura
+Classe (Enter para Guerreiro): Nome (Enter para Arthur): Lia, Mago, sua aventura começa!
+
+Lia | Nv. 1 | HP 80/80
+1 - Explorar
+2 - Inventário
+3 - Status
+4 - Habilidades
+5 - Salvar jogo
+6 - Carregar jogo
+7 - Sair
+Escolha: Lia
+Vida: 80/80
+Ataque: 16
+Defesa: 3
+Classe: Mago
+Nível: 1
+XP: 0/100
+Mana: 60/60
+
+Lia | Nv. 1 | HP 80/80
+1 - Explorar
+2 - Inventário
+3 - Status
+4 - Habilidades
+5 - Salvar jogo
+6 - Carregar jogo
+7 - Sair
+Escolha: A aventura foi encerrada. Até a próxima!

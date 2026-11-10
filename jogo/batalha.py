@@ -1,6 +1,3 @@
-from personagens.habilidade import HABILIDADES
-
-
 class Batalha:
     """Motor de turnos: desconhece teclado, terminal, janela e Pygame."""
 
@@ -26,15 +23,15 @@ class Batalha:
             dano = self.inimigo.receber_dano(dano_base)
             mensagem = f"Ataque causou {dano} de dano" + (" crítico!" if critico else ".")
         elif acao == "2":
-            habilidade = habilidade or "Golpe Poderoso"
-            dados = HABILIDADES.get(habilidade)
+            habilidade = habilidade or self.jogador.habilidade_padrao
+            dados = self.jogador.habilidades.get(habilidade)
             if dados is None or self.jogador.mana < dados.custo_mana:
                 return "Habilidade inválida ou mana insuficiente; o inimigo não agiu."
             if dados.tipo == "cura":
                 recuperada = self.jogador.aplicar_habilidade(habilidade)
                 mensagem = f"{habilidade}: você recuperou {recuperada} HP."
             else:
-                critico = habilidade == "Ataque Rápido" and self.rng.random() < 0.35
+                critico = dados.chance_critico > 0 and self.rng.random() < dados.chance_critico
                 dano = self.jogador.aplicar_habilidade(habilidade, self.inimigo, 2 if critico else 1)
                 mensagem = f"{habilidade} causou {dano} de dano" + (" crítico!" if critico else ".")
         elif acao == "3":

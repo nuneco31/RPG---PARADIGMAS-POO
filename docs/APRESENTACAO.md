@@ -1,50 +1,62 @@
-# Roteiro para apresentar o projeto
+# Roteiro de apresentação
 
-Use este roteiro como apoio e adapte a duração ao tempo da disciplina. Antes da apresentação, instale as dependências, rode os testes e confira a janela no computador que será usado.
+Priorize o console, como pede o trabalho. Reserve a interface gráfica para uma demonstração extra. Execute os testes antes da apresentação e leia os trechos indicados para conseguir explicar as decisões.
 
-## Demonstração sugerida: 6 a 8 minutos
+## Demonstração de 6 a 8 minutos
 
-| Tempo aproximado | Mostrar | Explicar |
+| Tempo | Mostrar | Explicar |
 | --- | --- | --- |
-| 1 minuto | Tela inicial e Caderno POO | Objetivo acadêmico e visão geral da aventura. |
-| 1 minuto | Inventário, equipamento e atributos | O jogador possui um inventário; equipar altera atributos com regras próprias. |
-| 2 minutos | Exploração e uma batalha | A interface envia comandos; campanha e batalha decidem o resultado. |
-| 2 minutos | `Personagem`, `Inimigo` e `acao_turno` | Abstração, herança, encapsulamento e polimorfismo em código real. |
-| 1 minuto | `Campanha` e testes | Regras independentes de Pygame, sorteador previsível e transições verificadas. |
-| 1 minuto | Salvar/carregar ou modo terminal | A mesma lógica pode ser apresentada de duas maneiras. |
+| 1 min | `python main.py`, escolha de classe e nome | Guerreiro, Mago e Arqueiro usam composição com `Vocacao`. |
+| 1 min | Inventário: equipar espada e consultar status | Encapsulamento de quantidades; composição e bônus de equipamento. |
+| 2 min | Combate no console, habilidade, resposta inimiga e vitória | Motor de turnos compartilhado, mana, dano e XP. |
+| 2 min | `Personagem`, `HabilidadeCura` e protocolos | Herança, polimorfismo e exemplos de SOLID. |
+| 1 min | Diagrama e `jogo/montagem.py` | Relações entre classes e injeção do adaptador JSON. |
+| 1 min | Testes e salvar/carregar | Evidências de extensão, substituição, segregação e persistência segura. |
 
-Não dependa de encontrar um inimigo específico ao acaso durante a fala. Use `--seed 7` e repita as mesmas escolhas para reproduzir os sorteios. Tenha o arquivo de código correspondente aberto para mostrar o comportamento do Mago e do Chefe. Não altere resultados ou atributos ao vivo sem explicar que se trata de preparação da demonstração.
+## Combate reproduzível
 
-## Uma explicação curta para começar
+Execute:
 
-> Crônicas da Floresta é um RPG em turnos usado para demonstrar POO. O jogador explora, organiza itens e enfrenta inimigos com comportamentos diferentes. Separamos as regras das interfaces para jogar tanto em uma janela quanto pelo terminal e testar a campanha sem abrir a parte gráfica.
+```sh
+python main.py --classe mago --nome Lia --seed 7
+```
 
-## Perguntas que o código ajuda a responder
+Escolha `1` (explorar), `2` (floresta), `2` (habilidade), `Enter` (Bola de Fogo) e `1` (ataque). O Mago enfrenta um Goblin: a magia gasta mana, o inimigo responde e a vitória concede 30 XP. Use `5` para salvar, `6` para carregar e `7` para sair.
 
-**Onde está o polimorfismo?** Na chamada `inimigo.acao_turno(jogador)`. A batalha usa o contrato comum; a classe concreta determina o comportamento. Ter subclasses, por si só, não é toda a demonstração: mostre também a chamada compartilhada.
+A semente controla o sorteio, mas as escolhas também influenciam a sequência. Não é preciso alterar atributos ou simular uma vitória para fazer essa demonstração.
 
-**Por que usar uma classe abstrata?** Ela representa as regras comuns e exige uma ação de turno. Criar um personagem incompleto diretamente deixa de fazer sentido.
+## Onde mostrar SOLID
 
-**O que protege a vida do personagem?** A propriedade `vida` restringe o valor. Explique que atributos com `_` são protegidos por convenção em Python, sem prometer privacidade absoluta.
+- **SRP:** compare `Batalha.executar_acao`, `JogoTerminal.executar` e `Salvamento.salvar`. Regras, apresentação e armazenamento têm responsabilidades distintas.
+- **OCP:** mostre `Jogador.aplicar_habilidade` delegando a `Habilidade.aplicar`. O teste de Dreno adiciona um comportamento sem editar o motor.
+- **LSP:** explique a chamada `inimigo.acao_turno(jogador)`. Mago e Chefe mudam a ação e preservam o retorno de dano real e os limites de vida.
+- **ISP:** mostre os protocolos separados de um método cada. No teste, um objeto somente lê e outro somente grava.
+- **DIP:** `Campanha` recebe as duas portas no construtor; `criar_campanha` escolhe `Salvamento`. A regra de jogo não importa o adaptador JSON.
 
-**Por que composição no inventário?** Um jogador tem uma mochila; ele não é uma mochila. O inventário controla quantidade e equipamentos enquanto o jogador controla experiência e combate.
+## Perguntas para preparar
 
-**O terminal e a janela são jogos diferentes?** São duas interfaces para o mesmo núcleo. Entrada e saída mudam; personagens, batalha, progresso e persistência são compartilhados.
+**Por que Guerreiro, Mago e Arqueiro não são subclasses?** As diferenças atuais são atributos e habilidades, representadas por uma vocação imutável. Composição evita repetir métodos. Herança continua presente nos personagens, inimigos e habilidades.
 
-**Onde aparecem outros paradigmas?** Os ciclos e condicionais são imperativos; os catálogos de itens e habilidades usam dados imutáveis. O projeto permanece principalmente orientado a objetos.
+**Onde está o polimorfismo de fato?** Nas chamadas a `acao_turno` e `aplicar`. Não basta ter subclasses: o chamador precisa usar o mesmo contrato com comportamentos diferentes.
 
-**Como demonstrar testes úteis?** Mostre que escolher uma ação inválida não consome o turno, vencer não concede XP duas vezes e carregar um arquivo inválido não modifica parcialmente o personagem. Esses testes descrevem comportamentos observáveis.
+**O que significa o prefixo `_`?** Acesso não público por convenção em Python. Os limites de vida e mana são aplicados pelas propriedades; não se trata de privacidade absoluta.
+
+**Protocol garante os tipos em execução?** Não. É um contrato estrutural para documentação e análise estática. Os testes verificam o comportamento dos adaptadores.
+
+**Por que a imagem do console é um registro renderizado?** O script executa o programa e converte sua saída real em PNG. Os arquivos TXT completos e o roteiro permitem reproduzir a sessão. Não são capturas da janela do sistema.
+
+**O save antigo ainda funciona?** Sim. A versão 1 sem classe usa Aventureiro; a versão 2 guarda a classe escolhida. Dados inválidos são recusados antes de alterar a partida ativa.
 
 ## Comandos de apoio
 
-```powershell
-python main.py --seed 7
-python main.py --terminal --seed 7
+```sh
+python main.py
+python main.py --classe mago --nome Lia --seed 7
+python -m unittest discover -s tests -p test_solid_e_classes.py -v
 python -m unittest discover -s tests -v
+python main.py --grafico --classe arqueiro
 ```
 
-Se estiver usando um ambiente virtual sem ativá-lo, substitua `python` por `.\.venv\Scripts\python.exe`.
+A suíte completa e o modo gráfico precisam de `pygame-ce`; o console e os testes específicos de classes/SOLID usam a biblioteca padrão. Consulte o README para instalar a dependência opcional.
 
-## O que reconhecer na conclusão
-
-O projeto demonstra uma pequena campanha, com interfaces gráfica e textual, e uma separação de responsabilidades adequada ao seu tamanho. O salvamento é local e cobre o estado entre encontros. A arte é procedural e a experiência ainda pode evoluir com novas missões, acessibilidade e balanceamento. Evite alegar “100% de cobertura”, perfeição ou originalidade absoluta; apresente as escolhas que consegue justificar no código.
+O escopo é uma campanha curta com armazenamento local. Balanceamento, missões e arte podem evoluir. Os testes cobrem comportamentos concretos, sem prometer cobertura total.

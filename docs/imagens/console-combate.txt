@@ -1,0 +1,47 @@
+
+================================================
+ CRÔNICAS DA FLORESTA — RPG DE PARADIGMAS
+================================================
+
+Lia | Nv. 1 | HP 80/80
+1 - Explorar
+2 - Inventário
+3 - Status
+4 - Habilidades
+5 - Salvar jogo
+6 - Carregar jogo
+7 - Sair
+Escolha: 
+================================================
+ FLORESTA SOMBRIA
+================================================
+1 - Seguir pela estrada
+2 - Entrar na floresta
+3 - Procurar itens
+4 - Voltar
+Escolha: 
+=== BATALHA: Goblin ===
+
+Você: 80/80 HP | Mana: 60/60
+Goblin: 45/45 HP
+1 - Ataque | 2 - Habilidade | 3 - Poção | 4 - Defender | 5 - Fugir
+Escolha: Habilidades: Bola de Fogo (10 mana), Cura (7 mana)
+Habilidade (Enter para Bola de Fogo): Bola de Fogo causou 44 de dano.
+Goblin usou ataque e causou 9 de dano.
+
+Você: 71/80 HP | Mana: 50/60
+Goblin: 1/45 HP
+1 - Ataque | 2 - Habilidade | 3 - Poção | 4 - Defender | 5 - Fugir
+Escolha: Ataque causou 1 de dano crítico!
+Goblin foi derrotado! +30 XP.
+Vitória! 1/3 encontros vencidos. Continue pela trilha.
+
+Lia | Nv. 1 | HP 71/80
+1 - Explorar
+2 - Inventário
+3 - Status
+4 - Habilidades
+5 - Salvar jogo
+6 - Carregar jogo
+7 - Sair
+Escolha: A aventura foi encerrada. Até a próxima!

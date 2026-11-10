@@ -30,7 +30,8 @@ class Salvamento:
 
     def salvar(self, jogador, progresso):
         dados = {
-            "versao": 1,
+            "versao": 2,
+            "classe": jogador.classe,
             "nome": jogador.nome,
             "nivel": jogador.nivel,
             "xp": jogador.xp,
@@ -64,8 +65,10 @@ class Salvamento:
         if not isinstance(dados, dict) or "nivel" not in dados:
             raise ValueError("Arquivo de salvamento inválido.")
         versao = dados.get("versao", 1)
-        if isinstance(versao, bool) or not isinstance(versao, int) or versao != 1:
+        if isinstance(versao, bool) or not isinstance(versao, int) or versao not in (1, 2):
             raise ValueError("Versão de salvamento incompatível.")
+        if versao == 2 and "classe" not in dados:
+            raise ValueError("Classe ausente no salvamento.")
         progresso = self.validar_progresso(dados.get("progresso", {}))
         candidato = Jogador(jogador.nome)
         candidato.restaurar_estado(dados)

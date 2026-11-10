@@ -1,15 +1,19 @@
 """Apresentação textual da mesma campanha usada pela janela Pygame."""
 from jogo.batalha_terminal import Batalha
-from jogo.campanha import Campanha
+from jogo.montagem import criar_campanha
+from personagens.jogador import Jogador
+from personagens.vocacao import CLASSES_JOGAVEIS, VOCACOES
 
 
 class JogoTerminal:
     """Lê escolhas e apresenta respostas; Campanha decide as regras da aventura."""
 
-    def __init__(self, input_fn=input, output_fn=print, rng=None, caminho_save=None):
+    def __init__(self, input_fn=input, output_fn=print, rng=None, caminho_save=None,
+                 jogador=None, escolher_personagem=False):
         self.input = input_fn
         self.output = output_fn
-        self.campanha = Campanha(rng=rng, caminho_save=caminho_save)
+        self.campanha = criar_campanha(rng=rng, caminho_save=caminho_save, jogador=jogador)
+        self.escolher_personagem = escolher_personagem
 
     @property
     def jogador(self):
@@ -25,7 +29,7 @@ class JogoTerminal:
 
     @property
     def salvamento(self):
-        return self.campanha.salvamento
+        return self.campanha.gravador
 
     def _ler(self, prompt="Escolha: "):
         try:
@@ -40,6 +44,8 @@ class JogoTerminal:
 
     def executar(self):
         self._titulo("CRÔNICAS DA FLORESTA — RPG DE PARADIGMAS")
+        if self.escolher_personagem and not self._criar_personagem():
+            return
         while True:
             self.output(f"\n{self.jogador.nome} | Nv. {self.jogador.nivel} | HP {self.jogador.vida}/{self.jogador.vida_maxima}")
             self.output("1 - Explorar\n2 - Inventário\n3 - Status\n4 - Habilidades\n5 - Salvar jogo\n6 - Carregar jogo\n7 - Sair")
@@ -66,6 +72,31 @@ class JogoTerminal:
                 return
             else:
                 self.output("Opção inválida. Digite um número de 1 a 7.")
+
+    def _criar_personagem(self):
+        self.output("Escolha seu personagem (ou digite sair):")
+        for numero, chave in enumerate(CLASSES_JOGAVEIS, 1):
+            vocacao = VOCACOES[chave]
+            self.output(f"{numero} - {vocacao.nome}: HP {vocacao.vida}, ataque {vocacao.ataque}, "
+                        f"defesa {vocacao.defesa}, mana {vocacao.mana}")
+            self.output("    Habilidades: " + ", ".join(h.nome for h in vocacao.habilidades))
+        while True:
+            escolha = self._ler("Classe (Enter para Guerreiro): ").lower() or "1"
+            if escolha == "sair":
+                return False
+            opcoes = {str(i): chave for i, chave in enumerate(CLASSES_JOGAVEIS, 1)}
+            chave = opcoes.get(escolha, escolha)
+            if chave in CLASSES_JOGAVEIS:
+                break
+            self.output("Classe inválida. Escolha 1, 2 ou 3.")
+        nome = self._ler("Nome (Enter para Arthur): ") or "Arthur"
+        if nome.lower() == "sair":
+            return False
+        jogador = Jogador(nome, chave)
+        jogador.inventario = self.jogador.inventario
+        self.campanha.jogador = jogador
+        self.output(f"{nome}, {jogador.vocacao.nome}, sua aventura começa!")
+        return True
 
     def menu_inventario(self):
         self._titulo("INVENTÁRIO")

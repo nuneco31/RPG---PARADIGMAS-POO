@@ -6,6 +6,7 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 from jogo.interface import JogoInterface
 from personagens.inimigo import Chefe, Goblin
+from personagens.jogador import Jogador
 
 
 class RNGDeterministico:
@@ -26,6 +27,22 @@ class TestInterfaceGrafica(unittest.TestCase):
 
     def tearDown(self):
         self.jogo.pygame.quit()
+
+    def test_classe_mago_exibe_e_executa_sua_habilidade_por_clique(self):
+        self.jogo.pygame.quit()
+        self.jogo = JogoInterface(rng=RNGDeterministico(), jogador=Jogador("Lia", "mago"))
+        self.jogo._evento("inimigo")
+        self.jogo.acionar("abrir_habilidades_combate")
+        self.jogo.renderizador.desenhar()
+        self.assertFalse(any(acao == "habilidade:Golpe Poderoso" for _, acao in self.jogo.botoes))
+        botao = next(rect for rect, acao in self.jogo.botoes if acao == "habilidade:Bola de Fogo")
+        pygame = self.jogo.pygame
+        pygame.event.clear()
+        pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=botao.center))
+        self.jogo.eventos.processar()
+        self.assertEqual(self.jogo.jogador.mana, 50)
+        self.assertEqual(self.jogo.inimigo.vida, 1)
+        self.assertEqual(self.jogo.estado, "combate")
 
     def test_clique_abre_exploracao_e_telas_sao_desenhadas(self):
         pygame = self.jogo.pygame
