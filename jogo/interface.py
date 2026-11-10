@@ -2,7 +2,7 @@
 
 import os
 
-from jogo.campanha import Campanha
+from jogo.montagem import criar_campanha
 from jogo.interface_eventos import EventosInterface
 from graficos.interface_renderizador import InterfaceRenderizador
 
@@ -14,11 +14,11 @@ class JogoInterface:
     Assim a Campanha também pode ser usada pelo terminal e pelos testes.
     """
 
-    def __init__(self, rng=None, caminho_save=None):
+    def __init__(self, rng=None, caminho_save=None, jogador=None):
         os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
         import pygame
 
-        self.campanha = Campanha(rng=rng, caminho_save=caminho_save)
+        self.campanha = criar_campanha(rng=rng, caminho_save=caminho_save, jogador=jogador)
         self.pygame = pygame
         # Não inicializamos áudio: a aventura não precisa de um dispositivo sonoro.
         pygame.display.init()

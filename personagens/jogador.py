@@ -1,22 +1,35 @@
 from personagens.personagem import Personagem
-from personagens.habilidade import HABILIDADES
+from personagens.vocacao import VOCACOES
 from personagens.inventario import Inventario
 
 
 class Jogador(Personagem):
     """Protagonista: possui inventário e concentra progressão e habilidades."""
 
-    def __init__(self, nome):
-        super().__init__(nome=nome, vida=100, ataque=20, defesa=5)
+    def __init__(self, nome, classe="aventureiro"):
+        if not isinstance(classe, str) or classe not in VOCACOES:
+            raise ValueError("Classe de personagem inválida.")
+        self._classe = classe
+        self.vocacao = VOCACOES[classe]
+        super().__init__(nome=nome, vida=self.vocacao.vida,
+                         ataque=self.vocacao.ataque, defesa=self.vocacao.defesa)
         self.nivel = 1
         self.xp = 0
         self.xp_necessaria = 100
-        self.mana_maxima = 30
-        self.mana = 30
+        self.mana_maxima = self.vocacao.mana
+        self.mana = self.mana_maxima
         self.inventario = Inventario()
-        self.habilidades = dict(HABILIDADES)
+        self.habilidades = {h.nome: h for h in self.vocacao.habilidades}
         self._defendendo = False
-        self.chance_esquiva = 0.08
+        self.chance_esquiva = self.vocacao.esquiva
+
+    @property
+    def classe(self):
+        return self._classe
+
+    @property
+    def habilidade_padrao(self):
+        return next(iter(self.habilidades))
 
     @property
     def mana(self):
@@ -27,7 +40,7 @@ class Jogador(Personagem):
         self._mana = max(0, min(self.mana_maxima, int(valor)))
 
     def mostrar_status(self):
-        return (f"{super().mostrar_status()}\nNível: {self.nivel}\n"
+        return (f"{super().mostrar_status()}\nClasse: {self.vocacao.nome}\nNível: {self.nivel}\n"
                 f"XP: {self.xp}/{self.xp_necessaria}\n"
                 f"Mana: {self.mana}/{self.mana_maxima}")
 
@@ -57,16 +70,13 @@ class Jogador(Personagem):
         habilidade = self.habilidades.get(nome)
         if habilidade is None or self.mana < habilidade.custo_mana:
             return None
-        if habilidade.tipo != "cura" and alvo is None:
-            return None
-        self.mana -= habilidade.custo_mana
-        poder = habilidade.calcular_poder(self.ataque)
-        if habilidade.tipo == "cura":
-            return self.curar(poder)
-        return alvo.receber_dano(poder * multiplicador)
+        efeito = habilidade.aplicar(self, alvo, multiplicador)
+        if efeito is not None:
+            self.mana -= habilidade.custo_mana
+        return efeito
 
     def usar_habilidade(self, alvo):
-        return self.usar_habilidade_nome("Golpe Poderoso", alvo)
+        return self.usar_habilidade_nome(self.habilidade_padrao, alvo)
 
     def usar_habilidade_nome(self, nome, alvo=None):
         return self.aplicar_habilidade(nome, alvo) is not None
@@ -94,7 +104,7 @@ class Jogador(Personagem):
         nome = dados.get("nome", self.nome)
         if not isinstance(nome, str):
             raise ValueError("Nome do jogador inválido.")
-        candidato = Jogador(nome)
+        candidato = Jogador(nome, dados.get("classe", "aventureiro"))
 
         def inteiro(chave, padrao, minimo=0):
             valor = dados.get(chave, padrao)
@@ -108,11 +118,11 @@ class Jogador(Personagem):
         if candidato.xp >= candidato.xp_necessaria:
             raise ValueError("XP incompatível com o próximo nível.")
         nivel = candidato.nivel - 1
-        candidato._vida_maxima = inteiro("vida_maxima", 100 + 20 * nivel, 1)
+        candidato._vida_maxima = inteiro("vida_maxima", candidato.vocacao.vida + 20 * nivel, 1)
         vida = inteiro("vida", candidato.vida_maxima)
-        candidato.ataque = inteiro("ataque", 20 + 4 * nivel)
-        candidato.defesa = inteiro("defesa", 5 + 2 * nivel)
-        candidato.mana_maxima = inteiro("mana_maxima", 30 + 5 * nivel)
+        candidato.ataque = inteiro("ataque", candidato.vocacao.ataque + 4 * nivel)
+        candidato.defesa = inteiro("defesa", candidato.vocacao.defesa + 2 * nivel)
+        candidato.mana_maxima = inteiro("mana_maxima", candidato.vocacao.mana + 5 * nivel)
         mana = inteiro("mana", candidato.mana_maxima)
         if vida > candidato.vida_maxima or mana > candidato.mana_maxima:
             raise ValueError("Vida ou mana acima do máximo.")

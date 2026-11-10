@@ -1,5 +1,4 @@
 from jogo.batalha import Batalha as RegrasBatalha
-from personagens.habilidade import HABILIDADES
 
 
 class Batalha(RegrasBatalha):
@@ -17,11 +16,13 @@ class Batalha(RegrasBatalha):
                 self._encerrada = True
                 return "fuga"
             if escolha == "2":
-                output_fn("Habilidades: " + ", ".join(HABILIDADES))
+                output_fn("Habilidades: " + ", ".join(
+                    f"{h.nome} ({h.custo_mana} mana)" for h in self.jogador.habilidades.values()))
+                padrao = self.jogador.habilidade_padrao
                 try:
-                    habilidade = input_fn("Habilidade (Enter para Golpe Poderoso): ").strip() or "Golpe Poderoso"
+                    habilidade = input_fn(f"Habilidade (Enter para {padrao}): ").strip() or padrao
                 except (EOFError, KeyboardInterrupt):
-                    habilidade = "Golpe Poderoso"
+                    habilidade = padrao
                 mensagem = self.executar_acao(escolha, habilidade=habilidade)
             elif escolha == "3":
                 pocoes = [nome for nome in self.jogador.inventario.itens

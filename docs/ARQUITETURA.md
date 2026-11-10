@@ -12,7 +12,8 @@ Entrada de texto              → JogoTerminal   → Campanha
                                                    ↓
                                       Jogador / Inimigo / Inventario
 
-Campanha → Salvamento → arquivo JSON
+Campanha → LeitorPartida / GravadorPartida ← Salvamento → arquivo JSON
+criar_campanha → cria Salvamento e o injeta na Campanha
 JogoInterface → InterfaceRenderizador → janela Pygame
 ```
 
@@ -47,6 +48,8 @@ Essa divisão impede que o botão de voltar interrompa um combate e evite a resp
 
 ## Pilares de POO com exemplos reais
 
+O [README](../README.md#os-cinco-princípios-solid) relaciona os cinco princípios SOLID ao código e aos testes. O [diagrama de classes](DIAGRAMA_CLASSES.md) complementa esta descrição.
+
 **Abstração.** `Personagem(ABC)` reúne aquilo que jogador e inimigo têm em comum. O método abstrato `acao_turno` obriga cada classe concreta a oferecer uma ação.
 
 **Herança.** `Jogador` reaproveita vida, ataque e defesa de `Personagem`, acrescentando mana, experiência e inventário. `Goblin`, `Orc`, `Mago` e `Chefe` aproveitam a estrutura de `Inimigo`.
@@ -56,6 +59,14 @@ Essa divisão impede que o botão de voltar interrompa um combate e evite a resp
 **Encapsulamento.** A propriedade `vida` mantém o valor entre zero e a vida máxima. `Inventario.itens` e `equipamentos` retornam cópias: mudar o dicionário recebido não altera a mochila internamente. O prefixo `_` expressa uma convenção de acesso protegido em Python, não uma proibição absoluta da linguagem.
 
 **Composição.** O jogador possui um inventário. A interface gráfica possui uma campanha. Uma relação “tem um” permite que cada objeto concentre uma responsabilidade sem precisar herdar de tudo que usa.
+
+O jogador também possui uma `Vocacao`: Guerreiro, Mago e Arqueiro são configurações imutáveis de atributos e habilidades. `HabilidadeCura` substitui `Habilidade.aplicar` para recuperar vida. O jogador cobra mana apenas após uma aplicação válida, e a batalha consulta o conjunto de habilidades daquele personagem.
+
+## Dependências e portas
+
+`Campanha` exige `leitor` e `gravador` no construtor. Os protocolos `LeitorPartida` e `GravadorPartida` pertencem ao núcleo e possuem um método cada. `jogo/montagem.py` escolhe o adaptador JSON para a aplicação normal. Testes podem injetar implementações distintas em memória sem alterar as regras da campanha.
+
+O ponto de composição é usado pelo console e pela interface gráfica. Para construir uma campanha diretamente com JSON, use `criar_campanha(rng=..., caminho_save=..., jogador=...)`; para substituir a persistência, use `Campanha(leitor=..., gravador=..., jogador=...)`.
 
 ## Outros elementos de paradigmas
 
@@ -68,6 +79,8 @@ Há decisões e cálculos que poderiam ser funções puras, mas o jogo é princi
 ## Persistência e segurança de estado
 
 O JSON guarda uma fotografia do personagem e do progresso. O carregamento valida os dados antes de aplicá-los ao jogador ativo, evitando deixar nome, atributos e inventário parcialmente modificados por um arquivo inválido. Armas e escudos ainda na mochila também são restaurados.
+
+A versão 2 acrescenta a classe. O leitor aceita a versão 1 anterior, reconstruindo o perfil Aventureiro quando a classe está ausente. Na versão 2, classe ausente ou desconhecida é erro; a partida ativa fica intacta. A vocação restaura habilidades e chance de esquiva sem serializar objetos Python.
 
 Os atributos salvos já incluem os bônus dos equipamentos. Ao carregar, o inventário restaura quais itens estão equipados e não soma esses bônus novamente. Esse detalhe preserva a compatibilidade com as partidas do projeto anterior.
 

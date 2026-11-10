@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from jogo.campanha import Campanha
+from jogo.montagem import criar_campanha
 from personagens.inimigo import Chefe, Goblin
 
 
@@ -19,7 +19,7 @@ class TestTransicoesDaCampanha(unittest.TestCase):
     def setUp(self):
         self.temporario = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporario.cleanup)
-        self.campanha = Campanha(
+        self.campanha = criar_campanha(
             rng=SorteioPrevisivel(),
             caminho_save=Path(self.temporario.name) / "partida.json",
         )
@@ -69,7 +69,7 @@ class TestTransicoesDaCampanha(unittest.TestCase):
 
     def test_save_com_progresso_invalido_nao_aplica_jogador(self):
         self.campanha.acionar("salvar")
-        caminho = self.campanha.salvamento.caminho
+        caminho = self.campanha.gravador.caminho
         dados = json.loads(caminho.read_text(encoding="utf-8"))
         dados["nome"] = "Não deve carregar"
         dados["progresso"] = {"encontros": -5, "chefe_derrotado": False}
